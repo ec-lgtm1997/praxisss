@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText, Output } from "ai";
+import { createOpenAI } from "@ai-sdk/openai"; // Nutzt die schlanke Kern-Schnittstelle
 import { z } from "zod";
 
 const Input = z.object({
@@ -19,13 +20,14 @@ export const gradeAnswer = createServerFn({ method: "POST" })
     const key = process.env.GEMINI_API_KEY;
     if (!key) throw new Error("GEMINI_API_KEY ist nicht konfiguriert.");
 
-    // Wir nutzen das Standard 'ai' Paket für Google, um externe Node-Module zu umgehen
-    const { createGoogleAI } = await import("@ai-sdk/google").catch(() => {
-      throw new Error("Modul @ai-sdk/google konnte auf dem Server nicht geladen werden.");
+    // Wir sprechen Gemini direkt über das standardisierte OpenAI-Format an.
+    // Das verhindert jegliche Build-Fehler im Frontend vollständig!
+    const geminiClient = createOpenAI({
+      apiKey: key,
+      baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
     });
-
-    const google = createGoogleAI({ apiKey: key });
-    const model = google("gemini-2.5-flash"); 
+    
+    const model = geminiClient("gemini-2.5-flash");
 
     const trimmed = data.userAnswer.trim();
     if (!trimmed) {
