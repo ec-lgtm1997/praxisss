@@ -1,10 +1,13 @@
 import { useState } from "react";
-import { ArrowLeft, Eye, Check, CircleHelp, X } from "lucide-react";
+import { ArrowLeft, Sparkles, Check, CircleHelp, X, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import { gradeAnswer } from "@/lib/grade.functions";
 import type { Question } from "@/data/questions";
 import type { AnswerRecord, Grade } from "./PraxisApp";
 
@@ -20,25 +23,61 @@ const GRADE_POINTS: Record<Grade, number> = {
   wrong: 0,
 };
 
+const GRADE_LABEL: Record<Grade, string> = {
+  correct: "Vollständig richtig",
+  partial: "Teilweise richtig",
+  wrong: "Falsch",
+};
+
+type Phase = "writing" | "loading" | "reviewing";
+
 export function Exam({ questions, onFinish, onCancel }: Props) {
+  const grade = useServerFn(gradeAnswer);
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
-  const [revealed, setRevealed] = useState(false);
-  const [grade, setGrade] = useState<Grade | null>(null);
+  const [phase, setPhase] = useState<Phase>("writing");
+  const [aiGrade, setAiGrade] = useState<Grade | null>(null);
+  const [aiReasoning, setAiReasoning] = useState<string>("");
+  const [finalGrade, setFinalGrade] = useState<Grade | null>(null);
   const [records, setRecords] = useState<AnswerRecord[]>([]);
 
   const current = questions[index];
   const total = questions.length;
-  const progress = ((index + (grade ? 1 : 0)) / total) * 100;
+  const progress = ((index + (finalGrade ? 1 : 0)) / total) * 100;
   const isLast = index === total - 1;
 
+  const handleAiCheck = async () => {
+    setPhase("loading");
+    try {
+      const res = await grade({
+        data: {
+          question: current.question,
+          modelAnswer: current.modelAnswer,
+          userAnswer: answer,
+        },
+      });
+      setAiGrade(res.grade);
+      setAiReasoning(res.reasoning);
+      setPhase("reviewing");
+    } catch (e) {
+      console.error(e);
+      toast.error("KI-Prüfung fehlgeschlagen. Bitte bewerte manuell.");
+      setAiGrade(null);
+      setAiReasoning("");
+      setPhase("reviewing");
+    }
+  };
+
   const handleNext = () => {
-    if (!grade) return;
+    if (!finalGrade) return;
     const record: AnswerRecord = {
       question: current,
       userAnswer: answer,
-      grade,
-      points: GRADE_POINTS[grade],
+      grade: finalGrade,
+      points: GRADE_POINTS[finalGrade],
+      aiSuggestion: aiGrade ?? undefined,
+      aiReasoning: aiReasoning || undefined,
+      overridden: aiGrade ? aiGrade !== finalGrade : undefined,
     };
     const next = [...records, record];
     if (isLast) {
@@ -48,8 +87,10 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
     setRecords(next);
     setIndex(index + 1);
     setAnswer("");
-    setRevealed(false);
-    setGrade(null);
+    setPhase("writing");
+    setAiGrade(null);
+    setAiReasoning("");
+    setFinalGrade(null);
   };
 
   return (
@@ -95,21 +136,26 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
           onChange={(e) => setAnswer(e.target.value)}
           placeholder="Ihre Antwort hier eintippen…"
           rows={6}
-          disabled={revealed}
+          disabled={phase !== "writing"}
           className="min-h-[140px] resize-none rounded-2xl border-border bg-secondary/40 p-4 text-base leading-relaxed focus-visible:ring-primary"
         />
 
-        {!revealed ? (
+        {phase === "writing" && (
           <Button
-            onClick={() => setRevealed(true)}
+            onClick={handleAiCheck}
+            disabled={!answer.trim()}
             size="lg"
-            variant="outline"
-            className="h-12 w-full rounded-2xl border-primary/30 text-primary hover:bg-primary-soft"
+            className="h-12 w-full rounded-2xl text-base font-semibold text-primary-foreground shadow-[var(--shadow-soft)] transition-transform active:scale-[0.98] disabled:opacity-50"
+            style={{ background: "var(--gradient-hero)" }}
           >
-            <Eye className="mr-2 h-5 w-5" />
-            Musterlösung anzeigen
+            <Sparkles className="mr-2 h-5 w-5" />
+            Antwort durch KI prüfen
           </Button>
-        ) : (
+        )}
+
+        {phase === "loading" && <AiLoading />}
+
+        {phase === "reviewing" && (
           <div className="animate-fade-in space-y-5">
             <div className="rounded-2xl bg-primary-soft/60 p-5">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">
@@ -120,30 +166,39 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
               </p>
             </div>
 
+            {aiGrade && (
+              <AiFeedbackBox
+                grade={aiGrade}
+                reasoning={aiReasoning}
+                confirmed={finalGrade === aiGrade}
+                onConfirm={() => setFinalGrade(aiGrade)}
+              />
+            )}
+
             <div className="space-y-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Selbstbewertung
+                {aiGrade ? "Manuell überschreiben" : "Selbstbewertung"}
               </p>
               <div className="grid grid-cols-1 gap-2">
                 <GradeButton
-                  active={grade === "correct"}
-                  onClick={() => setGrade("correct")}
+                  active={finalGrade === "correct"}
+                  onClick={() => setFinalGrade("correct")}
                   icon={<Check className="h-5 w-5" />}
                   label="Vollständig richtig"
                   points="+1"
                   tone="success"
                 />
                 <GradeButton
-                  active={grade === "partial"}
-                  onClick={() => setGrade("partial")}
+                  active={finalGrade === "partial"}
+                  onClick={() => setFinalGrade("partial")}
                   icon={<CircleHelp className="h-5 w-5" />}
                   label="Teilweise richtig"
                   points="+0.5"
                   tone="warning"
                 />
                 <GradeButton
-                  active={grade === "wrong"}
-                  onClick={() => setGrade("wrong")}
+                  active={finalGrade === "wrong"}
+                  onClick={() => setFinalGrade("wrong")}
                   icon={<X className="h-5 w-5" />}
                   label="Falsch"
                   points="0"
@@ -154,16 +209,123 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
 
             <Button
               onClick={handleNext}
-              disabled={!grade}
+              disabled={!finalGrade}
               size="lg"
               className="h-14 w-full rounded-2xl text-base font-semibold shadow-[var(--shadow-soft)] transition-transform active:scale-[0.98] disabled:opacity-50"
-              style={grade ? { background: "var(--gradient-hero)" } : undefined}
+              style={finalGrade ? { background: "var(--gradient-hero)" } : undefined}
             >
               {isLast ? "Auswertung anzeigen" : "Nächste Frage"}
             </Button>
           </div>
         )}
       </Card>
+    </div>
+  );
+}
+
+function AiLoading() {
+  return (
+    <div className="animate-fade-in space-y-4 rounded-2xl border border-primary/20 bg-primary-soft/40 p-6">
+      <div className="flex items-center gap-3">
+        <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <Sparkles className="absolute -right-1 -top-1 h-3.5 w-3.5 text-primary animate-pulse" />
+        </div>
+        <p className="text-sm font-semibold text-primary">
+          KI analysiert deine Antwort…
+        </p>
+      </div>
+      <div className="space-y-2">
+        <div className="h-3 w-full animate-pulse rounded-full bg-primary/15" />
+        <div className="h-3 w-5/6 animate-pulse rounded-full bg-primary/15" />
+        <div className="h-3 w-2/3 animate-pulse rounded-full bg-primary/15" />
+      </div>
+    </div>
+  );
+}
+
+const aiTones: Record<
+  Grade,
+  { wrap: string; chip: string; icon: React.ReactNode; label: string }
+> = {
+  correct: {
+    wrap: "border-success/40 bg-success-soft",
+    chip: "bg-success text-success-foreground",
+    icon: <Check className="h-4 w-4" />,
+    label: "Vollständig richtig · +1",
+  },
+  partial: {
+    wrap: "border-warning/40 bg-warning-soft",
+    chip: "bg-warning text-warning-foreground",
+    icon: <CircleHelp className="h-4 w-4" />,
+    label: "Teilweise richtig · +0,5",
+  },
+  wrong: {
+    wrap: "border-destructive/40 bg-danger-soft",
+    chip: "bg-destructive text-destructive-foreground",
+    icon: <X className="h-4 w-4" />,
+    label: "Falsch · 0",
+  },
+};
+
+function AiFeedbackBox({
+  grade,
+  reasoning,
+  confirmed,
+  onConfirm,
+}: {
+  grade: Grade;
+  reasoning: string;
+  confirmed: boolean;
+  onConfirm: () => void;
+}) {
+  const t = aiTones[grade];
+  return (
+    <div
+      className={cn(
+        "animate-fade-in space-y-4 rounded-2xl border p-5 transition-all",
+        t.wrap,
+      )}
+    >
+      <div className="flex items-center gap-2">
+        <Sparkles className="h-4 w-4 text-primary" />
+        <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+          KI-Feedback
+        </p>
+      </div>
+
+      <div
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold",
+          t.chip,
+        )}
+      >
+        {t.icon}
+        {t.label}
+      </div>
+
+      <p className="text-sm leading-relaxed text-foreground/90">{reasoning}</p>
+
+      <Button
+        onClick={onConfirm}
+        variant={confirmed ? "default" : "outline"}
+        className={cn(
+          "h-11 w-full rounded-xl text-sm font-semibold transition-all",
+          confirmed
+            ? "border-transparent text-primary-foreground"
+            : "border-primary/30 bg-card text-primary hover:bg-primary-soft",
+        )}
+        style={confirmed ? { background: "var(--gradient-hero)" } : undefined}
+      >
+        {confirmed ? (
+          <>
+            <Check className="mr-2 h-4 w-4" />
+            Empfehlung übernommen
+          </>
+        ) : (
+          `Empfehlung übernehmen (${GRADE_LABEL[grade]})`
+        )}
+      </Button>
     </div>
   );
 }
