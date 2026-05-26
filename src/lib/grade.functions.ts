@@ -1,9 +1,6 @@
-"use server"; // Zwingt TanStack & Vite, diese Datei NUR auf dem Server zu bauen
-
 import { createServerFn } from "@tanstack/react-start";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createGoogleAI } from "@ai-sdk/google"; // Wieder ein normaler Import oben!
 
 const Input = z.object({
   question: z.string().min(1),
@@ -21,6 +18,11 @@ export const gradeAnswer = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const key = process.env.GEMINI_API_KEY;
     if (!key) throw new Error("GEMINI_API_KEY ist nicht konfiguriert.");
+
+    // Wir nutzen das Standard 'ai' Paket für Google, um externe Node-Module zu umgehen
+    const { createGoogleAI } = await import("@ai-sdk/google").catch(() => {
+      throw new Error("Modul @ai-sdk/google konnte auf dem Server nicht geladen werden.");
+    });
 
     const google = createGoogleAI({ apiKey: key });
     const model = google("gemini-2.5-flash"); 
