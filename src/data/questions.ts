@@ -6,14 +6,14 @@ export interface Question {
 }
 
 export const questions: Question[] = [
-  // THEMA 1: BLUTENTNAHME
+ // THEMA 1: BLUTENTNAHME
   {
     id: "be-1",
     topic: "Blutentnahme",
     question:
       "Welche anatomischen Strukturen werden bevorzugt für die venöse Blutabnahme genutzt und wie sollte sich eine geeignete Vene beim Tasten anfühlen?",
     modelAnswer:
-      "Bevorzugt werden oberflächlich liegende Venen genutzt. Typische Stellen sind die Ellenbeuge, der Unterarm, der Handrücken, der Fußrücken sowie Kopfvenen bei Säuglingen. Besonders häufig nutzt man die V. mediana cubiti, V. cephalica und V. basilica. Eine geeignete Vene sollte sich weich, elastisch und wie ein „gut gefüllter Fahrradschlauch" anfühlen.",
+      "Bevorzugt werden oberflächlich liegende Venen genutzt. Typische Stellen sind die Ellenbeuge, der Unterarm, der Handrücken, der Fußrücken sowie Kopfvenen bei Säuglingen. Besonders häufig nutzt man die V. mediana cubiti, V. cephalica und V. basilica. Eine geeignete Vene sollte sich weich, elastisch und wie ein \"gut gefüllter Fahrradschlauch\" anfühlen.",
   },
   {
     id: "be-2",
