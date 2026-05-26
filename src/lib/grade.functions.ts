@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createLovableAiGatewayProvider } from "./ai-gateway.server";
+import { createGoogleAI } from "@ai-sdk/google";
 
 const Input = z.object({
   question: z.string().min(1),
@@ -17,11 +17,12 @@ const Schema = z.object({
 export const gradeAnswer = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => Input.parse(d))
   .handler(async ({ data }) => {
-    const key = process.env.LOVABLE_API_KEY;
-    if (!key) throw new Error("LOVABLE_API_KEY ist nicht konfiguriert.");
+    const key = process.env.GEMINI_API_KEY;
+    if (!key) throw new Error("GEMINI_API_KEY ist nicht konfiguriert.");
 
-    const gateway = createLovableAiGatewayProvider(key);
-    const model = gateway("google/gemini-3-flash-preview");
+    // Initialisiert Gemini direkt mit deinem kostenlosen Key aus der .env
+    const google = createGoogleAI({ apiKey: key });
+    const model = google("gemini-2.5-flash"); 
 
     const trimmed = data.userAnswer.trim();
     if (!trimmed) {
