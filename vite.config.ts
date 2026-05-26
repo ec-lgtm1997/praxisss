@@ -12,13 +12,4 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
-  // Hier schleusen wir die Rollup-Optionen für Vite ein:
-  vite: {
-    build: {
-      rollupOptions: {
-        // Zwingt das System, das Google-SDK komplett aus dem Client-Bundle zu lassen
-        external: ["@ai-sdk/google"],
-      },
-    },
-  },
 });
