@@ -149,7 +149,7 @@ export const questions: Question[] = [
     id: "nsv-1",
     topic: "Nadelstichverletzungen & Hygiene",
     question:
-      "Definiere den Begriff „Nadelstichverletzung" und nenne die drei gefährlichsten Erreger, die dadurch übertragen werden können.",
+      "Definiere den Begriff Nadelstichverletzung und nenne die drei gefährlichsten Erreger, die dadurch übertragen werden können.",
     modelAnswer:
       "Eine Nadelstichverletzung ist eine Verletzung durch ein scharfes oder spitzes Instrument, das zuvor mit Patientenmaterial kontaminiert wurde. Die gefährlichsten Folgeinfektionen sind Hepatitis B, Hepatitis C und HIV.",
   },
@@ -215,7 +215,7 @@ export const questions: Question[] = [
     id: "fix-5",
     topic: "Heimaufenthaltsgesetz & Fixierung",
     question:
-      "Erkläre den Unterschied zwischen einer „Freiheitsbeschränkung" und einer „Freiheitseinschränkung". Welche Kriterien müssen für Letztere erfüllt sein?",
+      "Erkläre den Unterschied zwischen einer Freiheitsbeschränkung und einer Freiheitseinschränkung. Welche Kriterien müssen für Letztere erfüllt sein?",
     modelAnswer:
       "Eine Freiheitsbeschränkung erfolgt gegen oder ohne den Willen der betroffenen Person. Eine Freiheitseinschränkung liegt vor, wenn die entscheidungsfähige Person der Maßnahme (z. B. dem Bettgitter aus Angst vor Stürzen) ausdrücklich und freiwillig zustimmt. Sie muss die Situation und Folgen verstehen, verständlich aufgeklärt worden sein und kann die Zustimmung jederzeit widerrufen.",
   },
@@ -247,7 +247,7 @@ export const questions: Question[] = [
     id: "fix-9",
     topic: "Heimaufenthaltsgesetz & Fixierung",
     question:
-      "Widerlege das Argument: „Fixierungen schützen ältere Menschen zuverlässig vor schweren Sturzverletzungen." Welche Risiken entstehen stattdessen?",
+      "Widerlege das Argument: Fixierungen schützen ältere Menschen zuverlässig vor schweren Sturzverletzungen. Welche Risiken entstehen stattdessen?",
     modelAnswer:
       "Fixierungen schützen nicht automatisch vor Stürzen; sie erhöhen das Sturzrisiko oft sogar, weil Betroffene panisch versuchen, über Bettgitter zu klettern oder sich aus Gurten zu befreien. Zudem drohen immense physische Risiken (Muskelabbau, Dekubitus, Thrombosen, Pneumonien, Kontrakturen, Strangulation) sowie psychische Folgen (Angst, Depression, Resignation, Traumatisierung).",
   },
@@ -289,7 +289,7 @@ export const questions: Question[] = [
     id: "inj-2",
     topic: "Injektionen & Infusionen",
     question:
-      "Was besagt die „7-R-Regel" bei der Medikamentenverabreichung? Zähle alle Komponenten auf.",
+      "Was besagt die 7-R-Regel bei der Medikamentenverabreichung? Zähle alle Komponenten auf.",
     modelAnswer:
       "Richtiger Patient, richtiges Arzneimittel, richtige Dosierung, richtige Applikationsart, richtiger Zeitpunkt, richtige Anwendungsdauer, richtige Dokumentation.",
   },
@@ -331,7 +331,7 @@ export const questions: Question[] = [
     id: "zvk-1",
     topic: "ZVK & Port-Systeme",
     question:
-      "Was versteht man unter einem „Port-Block" (inkl. technischer Durchführung des positiven Drucks) und welche Hygieneprinzipien gelten beim Verbandswechsel einer liegenden Port-Nadel?",
+      "Was versteht man unter einem Port-Block (inkl. technischer Durchführung des positiven Drucks) und welche Hygieneprinzipien gelten beim Verbandswechsel einer liegenden Port-Nadel?",
     modelAnswer:
       "Ein Portblock füllt die Portkammer und den Katheter vollständig mit Flüssigkeit (z. B. NaCl 0,9% oder Taurolidin), um Verschlüssen (Okklusionen) und Infektionen vorzubeugen. Positiver Druck: Beim Injizieren des letzten Milliliters wird die Klemme oder der Dreiwegehahn geschlossen, während man noch drückt, damit kein Patientenblut in die Katheterspitze zurückgesaugt wird. Verbandswechsel: Erfordert absolut steriles, aseptisches Arbeiten. Nach Entfernung des alten Verbands und Hautdesinfektion (Einwirkzeit beachten) wird ein neuer steriler Verband angelegt; dieser ist spätestens alle 48 Stunden bzw. sofort bei Feuchtigkeit oder Ablösung zu wechseln. Es dürfen nur 10-ml-Spritzen verwendet und es muss pulsatil gespült werden.",
   },
