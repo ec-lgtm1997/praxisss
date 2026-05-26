@@ -1,7 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { generateText, Output } from "ai";
 import { z } from "zod";
-import { createGoogleAI } from "@ai-sdk/google";
 
 const Input = z.object({
   question: z.string().min(1),
@@ -19,6 +18,9 @@ export const gradeAnswer = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const key = process.env.GEMINI_API_KEY;
     if (!key) throw new Error("GEMINI_API_KEY ist nicht konfiguriert.");
+
+    // Dynamischer Import verlagert das Google SDK komplett auf den Server
+    const { createGoogleAI } = await import("@ai-sdk/google");
 
     // Initialisiert Gemini direkt mit deinem kostenlosen Key aus der .env
     const google = createGoogleAI({ apiKey: key });
