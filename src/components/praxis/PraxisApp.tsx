@@ -11,6 +11,9 @@ export interface AnswerRecord {
   userAnswer: string;
   grade: Grade;
   points: number;
+  aiSuggestion?: Grade;
+  aiReasoning?: string;
+  overridden?: boolean;
 }
 
 type Stage = "setup" | "exam" | "results";
