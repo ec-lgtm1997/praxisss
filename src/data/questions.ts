@@ -31,11 +31,11 @@ export const questions: Question[] = [
     modelAnswer:
       "Die Blutwerte können beeinflusst werden durch: körperliche Belastung, Nahrungsaufnahme, Medikamente, die Körperlage, eine zu lange Stauung sowie starken Sog bei der Blutabnahme.",
   },
-  {
+ {
     id: "be-4",
     topic: "Blutentnahme",
     question:
-      "Welche konkreten laborchemischen und zellulären Veränderungen treten auf, wenn die Hand des Patienten vor der Abnahme stark „pumpt" oder der Stauschlauch zu lange angelegt bleibt?",
+      "Welche konkreten laborchemischen und zellulären Veränderungen treten auf, wenn die Hand des Patienten vor der Abnahme stark „pumpt\" oder der Stauschlauch zu lange angelegt bleibt?",
     modelAnswer:
       "Dies kann zu einer Hämolyse (Zerstörung der roten Blutkörperchen) sowie zu künstlich erhöhten Kaliumwerten und allgemein verfälschten Laborwerten führen.",
   },
@@ -173,9 +173,9 @@ export const questions: Question[] = [
     id: "nsv-4",
     topic: "Nadelstichverletzungen & Hygiene",
     question:
-      "Was versteht man unter dem Begriff „Recapping", warum ist es verboten und wie wird es stattdessen richtig gemacht?",
+      "Was versteht man unter dem Begriff Recapping, warum ist es verboten und wie wird es stattdessen richtig gemacht?",
     modelAnswer:
-      "„Recapping" bezeichnet das Wiederaufsetzen der Schutzkappe auf eine gebrauchte Nadel. Es ist streng verboten, da es die Hauptursache für Kanülenverletzungen darstellt. Benutzte Sicherheitskanülen müssen stattdessen unter Aktivierung des Safety-Mechanismus sofort unverkappt in einem Abwurfbehälter entsorgt werden.",
+      "Recapping bezeichnet das Wiederaufsetzen der Schutzkappe auf eine gebrauchte Nadel. Es ist streng verboten, da es die Hauptursache für Kanülenverletzungen darstellt. Benutzte Sicherheitskanülen müssen stattdessen unter Aktivierung des Safety-Mechanismus sofort unverkappt in einem Abwurfbehälter entsorgt werden.",
   },
 
   // THEMA 3: HEIMAUFENTHALTSGESETZ, FIXIERUNG & STURZPROPHYLAXE
