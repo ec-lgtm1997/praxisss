@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Setup } from "./Setup";
 import { Exam } from "./Exam";
 import { Results } from "./Results";
+import { Toaster } from "@/components/ui/sonner";
 import { questions as ALL_QUESTIONS, type Question } from "@/data/questions";
 
 export type Grade = "correct" | "partial" | "wrong";
@@ -58,6 +59,7 @@ export function PraxisApp() {
 
   return (
     <div className="min-h-screen w-full" style={{ background: "var(--gradient-soft)" }}>
+      <Toaster position="top-center" />
       <div className="mx-auto w-full max-w-2xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
         {view}
       </div>
