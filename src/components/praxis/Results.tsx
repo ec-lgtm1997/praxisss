@@ -151,6 +151,37 @@ export function Results({ records, onRestart }: Props) {
                     {r.question.modelAnswer}
                   </p>
                 </div>
+                {r.aiReasoning && (
+                  <div className="rounded-xl border border-border/60 bg-secondary/40 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-primary">
+                        <Sparkles className="h-3.5 w-3.5" />
+                        KI-Feedback
+                      </p>
+                      {r.overridden && (
+                        <span className="rounded-full bg-warning-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-warning-foreground">
+                          Manuell überschrieben
+                        </span>
+                      )}
+                    </div>
+                    {r.aiSuggestion && (
+                      <p className="mt-1.5 text-xs text-muted-foreground">
+                        Empfehlung: <span className="font-semibold text-foreground">{gradeMeta[r.aiSuggestion].label}</span>
+                      </p>
+                    )}
+                    <p className="mt-1.5 leading-relaxed text-foreground/90">
+                      {r.aiReasoning}
+                    </p>
+                  </div>
+                )}
+                <div className="flex items-center justify-between rounded-xl bg-secondary/30 px-3 py-2 text-xs">
+                  <span className="font-semibold uppercase tracking-wider text-muted-foreground">
+                    Vergebene Punkte
+                  </span>
+                  <span className="text-sm font-bold text-foreground">
+                    {r.points} / 1
+                  </span>
+                </div>
               </div>
             </Card>
           );
