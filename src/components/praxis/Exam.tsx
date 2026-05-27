@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Sparkles, Check, CircleHelp, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkles, Check, Circle as CircleHelp, X, Loader as Loader2 } from "lucide-react";
 import { useServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,10 +9,11 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { gradeAnswer } from "@/lib/grade.functions";
 import type { Question } from "@/data/questions";
-import type { AnswerRecord, Grade } from "./PraxisApp";
+import type { AnswerRecord, Grade, EvaluationMode } from "./PraxisApp";
 
 interface Props {
   questions: Question[];
+  evaluationMode: EvaluationMode;
   onFinish: (records: AnswerRecord[]) => void;
   onCancel: () => void;
 }
@@ -31,7 +32,7 @@ const GRADE_LABEL: Record<Grade, string> = {
 
 type Phase = "writing" | "loading" | "reviewing";
 
-export function Exam({ questions, onFinish, onCancel }: Props) {
+export function Exam({ questions, evaluationMode, onFinish, onCancel }: Props) {
   const grade = useServerFn(gradeAnswer);
   const [index, setIndex] = useState(0);
   const [answer, setAnswer] = useState("");
@@ -40,10 +41,14 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
   const [aiReasoning, setAiReasoning] = useState<string>("");
   const [finalGrade, setFinalGrade] = useState<Grade | null>(null);
   const [records, setRecords] = useState<AnswerRecord[]>([]);
+  const [isProcessingExam, setIsProcessingExam] = useState(false);
 
   const current = questions[index];
   const total = questions.length;
-  const progress = ((index + (finalGrade ? 1 : 0)) / total) * 100;
+  const isLearningMode = evaluationMode === "learning";
+  const progress = isLearningMode
+    ? ((index + (finalGrade ? 1 : 0)) / total) * 100
+    : ((index) / total) * 100;
   const isLast = index === total - 1;
 
   const handleAiCheck = async () => {
@@ -93,6 +98,49 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
     setFinalGrade(null);
   };
 
+  const handleExamNext = async () => {
+    if (!answer.trim()) {
+      toast.error("Bitte gib eine Antwort ein.");
+      return;
+    }
+
+    setIsProcessingExam(true);
+    try {
+      const res = await grade({
+        data: {
+          question: current.question,
+          modelAnswer: current.modelAnswer,
+          userAnswer: answer,
+        },
+      });
+
+      const record: AnswerRecord = {
+        question: current,
+        userAnswer: answer,
+        grade: res.grade,
+        points: GRADE_POINTS[res.grade],
+        aiSuggestion: res.grade,
+        aiReasoning: res.reasoning,
+        overridden: false,
+      };
+
+      const next = [...records, record];
+      if (isLast) {
+        onFinish(next);
+        return;
+      }
+
+      setRecords(next);
+      setIndex(index + 1);
+      setAnswer("");
+    } catch (e) {
+      console.error(e);
+      toast.error("KI-Bewertung fehlgeschlagen. Bitte versuche es erneut.");
+    } finally {
+      setIsProcessingExam(false);
+    }
+  };
+
   return (
     <div className="animate-fade-in space-y-6">
       <div className="flex items-center justify-between">
@@ -136,11 +184,11 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
           onChange={(e) => setAnswer(e.target.value)}
           placeholder="Ihre Antwort hier eintippen…"
           rows={6}
-          disabled={phase !== "writing"}
+          disabled={phase !== "writing" || isProcessingExam}
           className="min-h-[140px] resize-none rounded-2xl border-border bg-secondary/40 p-4 text-base leading-relaxed focus-visible:ring-primary"
         />
 
-        {phase === "writing" && (
+        {isLearningMode && phase === "writing" && (
           <Button
             onClick={handleAiCheck}
             disabled={!answer.trim()}
@@ -153,9 +201,30 @@ export function Exam({ questions, onFinish, onCancel }: Props) {
           </Button>
         )}
 
-        {phase === "loading" && <AiLoading />}
+        {!isLearningMode && (
+          <Button
+            onClick={handleExamNext}
+            disabled={!answer.trim() || isProcessingExam}
+            size="lg"
+            className="h-12 w-full rounded-2xl text-base font-semibold text-primary-foreground shadow-[var(--shadow-soft)] transition-transform active:scale-[0.98] disabled:opacity-50"
+            style={{ background: "var(--gradient-hero)" }}
+          >
+            {isProcessingExam ? (
+              <>
+                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                Wird bewertet…
+              </>
+            ) : (
+              <>
+                {isLast ? "Prüfung abschließen" : "Nächste Frage"}
+              </>
+            )}
+          </Button>
+        )}
 
-        {phase === "reviewing" && (
+        {isLearningMode && phase === "loading" && <AiLoading />}
+
+        {isLearningMode && phase === "reviewing" && (
           <div className="animate-fade-in space-y-5">
             <div className="rounded-2xl bg-primary-soft/60 p-5">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-primary">

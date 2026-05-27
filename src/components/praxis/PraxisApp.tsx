@@ -21,12 +21,15 @@ type Stage = "setup" | "exam" | "results";
 
 export type Mode = "topic" | "random";
 
+export type EvaluationMode = "learning" | "exam";
+
 export function PraxisApp() {
   const [stage, setStage] = useState<Stage>("setup");
   const [session, setSession] = useState<Question[]>([]);
   const [records, setRecords] = useState<AnswerRecord[]>([]);
+  const [evaluationMode, setEvaluationMode] = useState<EvaluationMode>("learning");
 
-  const startExam = (mode: Mode, topic: string | null, count: number | "all") => {
+  const startExam = (mode: Mode, topic: string | null, count: number | "all", evalMode: EvaluationMode) => {
     let pool = ALL_QUESTIONS;
     if (mode === "topic" && topic) {
       pool = pool.filter((q) => q.topic === topic);
@@ -35,6 +38,7 @@ export function PraxisApp() {
     const n = count === "all" ? shuffled.length : Math.min(count, shuffled.length);
     setSession(shuffled.slice(0, n));
     setRecords([]);
+    setEvaluationMode(evalMode);
     setStage("exam");
   };
 
@@ -51,11 +55,11 @@ export function PraxisApp() {
 
   const view = useMemo(() => {
     if (stage === "exam")
-      return <Exam questions={session} onFinish={finishExam} onCancel={reset} />;
+      return <Exam questions={session} evaluationMode={evaluationMode} onFinish={finishExam} onCancel={reset} />;
     if (stage === "results")
       return <Results records={records} onRestart={reset} />;
     return <Setup onStart={startExam} />;
-  }, [stage, session, records]);
+  }, [stage, session, records, evaluationMode]);
 
   return (
     <div className="min-h-screen w-full" style={{ background: "var(--gradient-soft)" }}>

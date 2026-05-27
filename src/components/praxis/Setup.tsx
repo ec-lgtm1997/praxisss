@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Stethoscope, Shuffle, BookOpen, ChevronRight } from "lucide-react";
+import { Stethoscope, Shuffle, BookOpen, ChevronRight, GraduationCap, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { topics } from "@/data/questions";
 import { cn } from "@/lib/utils";
-import type { Mode } from "./PraxisApp";
+import type { Mode, EvaluationMode } from "./PraxisApp";
 
 interface Props {
-  onStart: (mode: Mode, topic: string | null, count: number | "all") => void;
+  onStart: (mode: Mode, topic: string | null, count: number | "all", evaluationMode: EvaluationMode) => void;
 }
 
 const COUNTS: (number | "all")[] = [5, 10, 20, "all"];
@@ -16,6 +16,7 @@ export function Setup({ onStart }: Props) {
   const [mode, setMode] = useState<Mode>("topic");
   const [topic, setTopic] = useState<string | null>(topics[0] ?? null);
   const [count, setCount] = useState<number | "all">(10);
+  const [evaluationMode, setEvaluationMode] = useState<EvaluationMode>("learning");
 
   const canStart = mode === "random" || !!topic;
 
@@ -37,6 +38,28 @@ export function Setup({ onStart }: Props) {
       </header>
 
       <Card className="space-y-6 rounded-3xl border-border/60 bg-card p-6 shadow-[var(--shadow-card)]">
+        <section className="space-y-3">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Bewertungsmodus
+          </h2>
+          <div className="space-y-2">
+            <EvalModeButton
+              active={evaluationMode === "learning"}
+              onClick={() => setEvaluationMode("learning")}
+              icon={<GraduationCap className="h-5 w-5" />}
+              label="Lernmodus"
+              description="KI prüft jede Antwort, du entscheidest final — ideal zum Üben"
+            />
+            <EvalModeButton
+              active={evaluationMode === "exam"}
+              onClick={() => setEvaluationMode("exam")}
+              icon={<ClipboardCheck className="h-5 w-5" />}
+              label="Prüfungsmodus"
+              description="Keine Musterlösung während der Prüfung, automatische KI-Bewertung am Ende"
+            />
+          </div>
+        </section>
+
         <section className="space-y-3">
           <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Modus
@@ -115,13 +138,54 @@ export function Setup({ onStart }: Props) {
       <Button
         size="lg"
         disabled={!canStart}
-        onClick={() => onStart(mode, topic, count)}
+        onClick={() => onStart(mode, topic, count, evaluationMode)}
         className="h-14 w-full rounded-2xl text-base font-semibold shadow-[var(--shadow-soft)] transition-transform active:scale-[0.98]"
         style={{ background: "var(--gradient-hero)" }}
       >
         Prüfung starten
       </Button>
     </div>
+  );
+}
+
+function EvalModeButton({
+  active,
+  onClick,
+  icon,
+  label,
+  description,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+  description: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex w-full items-start gap-4 rounded-2xl border px-5 py-4 text-left transition-all duration-200",
+        active
+          ? "border-primary bg-primary-soft shadow-sm"
+          : "border-border bg-card hover:border-primary/40 hover:bg-secondary",
+      )}
+    >
+      <span
+        className={cn(
+          "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
+          active ? "bg-primary/15 text-primary" : "bg-secondary text-muted-foreground",
+        )}
+      >
+        {icon}
+      </span>
+      <div className="flex-1 space-y-1">
+        <p className={cn("text-base font-semibold", active ? "text-primary" : "text-foreground")}>
+          {label}
+        </p>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+    </button>
   );
 }
 
